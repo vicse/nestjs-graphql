@@ -10,6 +10,9 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { SignupInput } from '../auth/dto/inputs';
 import * as bcrypt from 'bcrypt';
+import { ValidRoles } from '../auth/enums/valid-roles.enum';
+import { UpdateItemInput } from '../items/dto/inputs';
+import { UpdateUserInput } from './dto/update-user.input';
 
 @Injectable()
 export class UsersService {
@@ -32,8 +35,13 @@ export class UsersService {
     }
   }
 
-  findAll(): Promise<User[]> {
-    return this.userRepository.find();
+  findAll(roles: ValidRoles[]): Promise<User[]> {
+    if (roles.length === 0) return this.userRepository.find();
+    return this.userRepository
+      .createQueryBuilder('users')
+      .leftJoinAndSelect('users.lastUpdatedBy', 'userAdmin')
+      .where('ARRAY[users.roles] && ARRAY[:...roles]', { roles })
+      .getMany();
   }
 
   async findOneById(id: string): Promise<User> {
@@ -50,8 +58,28 @@ export class UsersService {
     }
   }
 
-  block(id: string) {
-    return `This action removes a #${id} user`;
+  async update(
+    id: string,
+    updateUserInput: UpdateUserInput,
+    updatedBy: User,
+  ): Promise<User> {
+    try {
+      const user = await this.userRepository.preload({
+        ...updateUserInput,
+        id,
+      });
+      user.lastUpdatedBy = updatedBy;
+      return await this.userRepository.save(user);
+    } catch (error) {
+      this.handleDBErrors(error);
+    }
+  }
+
+  async block(id: string, adminUser: User): Promise<User> {
+    const userToBlock = await this.findOneById(id);
+    userToBlock.isActive = false;
+    userToBlock.lastUpdatedBy = adminUser;
+    return await this.userRepository.save(userToBlock);
   }
 
   private handleDBErrors(error: any): never {

@@ -9,6 +9,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { UsersModule } from './users/users.module';
 import { AuthModule } from './auth/auth.module';
 import * as process from 'node:process';
+import { GraphQLError } from 'graphql/error';
 
 @Module({
   imports: [
@@ -19,6 +20,13 @@ import * as process from 'node:process';
       playground: false,
       autoSchemaFile: join(process.cwd(), 'src/schema.gql'),
       plugins: [ApolloServerPluginLandingPageLocalDefault()],
+      formatError: ({ message, extensions }: GraphQLError) => ({
+        message,
+        extensions: {
+          code: extensions.code,
+          response: extensions.originalError,
+        },
+      }),
     }),
     TypeOrmModule.forRoot({
       type: 'postgres',
