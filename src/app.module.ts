@@ -10,24 +10,50 @@ import { UsersModule } from './users/users.module';
 import { AuthModule } from './auth/auth.module';
 import * as process from 'node:process';
 import { GraphQLError } from 'graphql/error';
+import { JwtService } from '@nestjs/jwt';
 
 @Module({
   imports: [
     ConfigModule.forRoot(),
-    GraphQLModule.forRoot<ApolloDriverConfig>({
+    GraphQLModule.forRootAsync({
       driver: ApolloDriver,
-      // debug: false,
-      playground: false,
-      autoSchemaFile: join(process.cwd(), 'src/schema.gql'),
-      plugins: [ApolloServerPluginLandingPageLocalDefault()],
-      formatError: ({ message, extensions }: GraphQLError) => ({
-        message,
-        extensions: {
-          code: extensions.code,
-          response: extensions.originalError,
+      imports: [AuthModule],
+      inject: [JwtService],
+      useFactory: async (jwtService: JwtService) => ({
+        playground: false,
+        autoSchemaFile: join(process.cwd(), 'src/schema.gql'),
+        plugins: [ApolloServerPluginLandingPageLocalDefault()],
+        formatError: ({ message, extensions }: GraphQLError) => ({
+          message,
+          extensions: {
+            code: extensions.code,
+            response: extensions.originalError,
+          },
+        }),
+        context({ req }) {
+          // BLOQUEAR GQL SCHEMA
+          // const token = req.headers.authorization?.replace('Bearer ', '');
+          // if (!token) throw new Error('Token needed');
+          //
+          // const payload = jwtService.decode(token);
+          // if (!payload) throw new Error('Token not valid');
         },
       }),
     }),
+    // GraphQLModule.forRoot<ApolloDriverConfig>({
+    //   driver: ApolloDriver,
+    //   // debug: false,
+    //   playground: false,
+    //   autoSchemaFile: join(process.cwd(), 'src/schema.gql'),
+    //   plugins: [ApolloServerPluginLandingPageLocalDefault()],
+    //   formatError: ({ message, extensions }: GraphQLError) => ({
+    //     message,
+    //     extensions: {
+    //       code: extensions.code,
+    //       response: extensions.originalError,
+    //     },
+    //   }),
+    // }),
     TypeOrmModule.forRoot({
       type: 'postgres',
       host: process.env.DB_HOST,
