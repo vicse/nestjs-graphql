@@ -11,7 +11,6 @@ import { Repository } from 'typeorm';
 import { SignupInput } from '../auth/dto/inputs';
 import * as bcrypt from 'bcrypt';
 import { ValidRoles } from '../auth/enums/valid-roles.enum';
-import { UpdateItemInput } from '../items/dto/inputs';
 import { UpdateUserInput } from './dto/update-user.input';
 
 @Injectable()
