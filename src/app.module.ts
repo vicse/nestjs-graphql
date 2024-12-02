@@ -11,6 +11,7 @@ import { AuthModule } from './auth/auth.module';
 import * as process from 'node:process';
 import { GraphQLError } from 'graphql/error';
 import { JwtService } from '@nestjs/jwt';
+import { SeedModule } from './seed/seed.module';
 
 @Module({
   imports: [
@@ -67,6 +68,7 @@ import { JwtService } from '@nestjs/jwt';
     ItemsModule,
     UsersModule,
     AuthModule,
+    SeedModule,
   ],
   controllers: [],
   providers: [],
