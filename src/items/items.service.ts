@@ -52,14 +52,13 @@ export class ItemsService {
     return item;
   }
 
-  async update(
-    id: string,
-    updateItemInput: UpdateItemInput,
-    user: User,
-  ): Promise<Item> {
-    await this.findOne(id, user);
+  async update(updateItemInput: UpdateItemInput, user: User): Promise<Item> {
+    await this.findOne(updateItemInput.id, user);
     const item = await this.itemsRepository.preload(updateItemInput);
-    if (!item) throw new NotFoundException(`Item with id ${id} not found`);
+    if (!item)
+      throw new NotFoundException(
+        `Item with id ${updateItemInput.id} not found`,
+      );
     return this.itemsRepository.save(item);
   }
 

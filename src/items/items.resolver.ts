@@ -43,7 +43,7 @@ export class ItemsResolver {
     @Args('updateItemInput') updateItemInput: UpdateItemInput,
     @CurrentUser() user: User,
   ): Promise<Item> {
-    return this.itemsService.update(updateItemInput.id, updateItemInput, user);
+    return this.itemsService.update(updateItemInput, user);
   }
 
   @Mutation(() => Item)
