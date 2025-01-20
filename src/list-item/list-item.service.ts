@@ -14,14 +14,15 @@ export class ListItemService {
     private readonly listItemRepository: Repository<ListItem>,
   ) {}
 
-  create(createListItemInput: CreateListItemInput): Promise<ListItem> {
+  async create(createListItemInput: CreateListItemInput): Promise<ListItem> {
     const { listId, itemId, ...restListItem } = createListItemInput;
     const newListItem = this.listItemRepository.create({
       ...restListItem,
       item: { id: itemId },
       list: { id: listId },
     });
-    return this.listItemRepository.save(newListItem);
+    await this.listItemRepository.save(newListItem);
+    return this.findOne(newListItem.id);
   }
 
   findAll(
