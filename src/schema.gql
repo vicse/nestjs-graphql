@@ -2,10 +2,20 @@
 # THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
 # ------------------------------------------------------
 
+type ListItem {
+  id: ID!
+  quantity: Float!
+  completed: Boolean!
+  list: List!
+  item: Item!
+}
+
 type List {
   id: ID!
   name: String!
   user: User!
+  items(page: Int = 1, limit: Int = 10, search: String): [ListItem!]!
+  totalItems: Int!
 }
 
 type User {
@@ -33,11 +43,6 @@ type AuthResponse {
   user: User!
 }
 
-type ListItem {
-  """Example field (placeholder)"""
-  exampleField: Int!
-}
-
 type Query {
   revalidate: AuthResponse!
   users(roles: [ValidRoles!] = []): [User!]!
@@ -46,7 +51,7 @@ type Query {
   item(id: ID!): Item!
   lists(page: Int = 1, limit: Int = 10, search: String): [List!]!
   list(id: ID!): List!
-  listItem(id: Int!): ListItem!
+  listItem(id: ID!): ListItem!
 }
 
 enum ValidRoles {
@@ -66,12 +71,12 @@ type Mutation {
   createList(createListInput: CreateListInput!): List!
   updateList(updateListInput: UpdateListInput!): List!
   removeList(id: ID!): List!
+  createListItem(createListItemInput: CreateListItemInput!): ListItem!
+  updateListItem(updateListItemInput: UpdateListItemInput!): ListItem!
+  removeListItem(id: ID!): ListItem!
 
   """Ejecuta la construcción de la base de datos """
   executeSeed: Boolean!
-  createListItem(createListItemInput: CreateListItemInput!): ListItem!
-  updateListItem(updateListItemInput: UpdateListItemInput!): ListItem!
-  removeListItem(id: Int!): ListItem!
 }
 
 input SignupInput {
@@ -115,12 +120,16 @@ input UpdateListInput {
 }
 
 input CreateListItemInput {
-  """Example field (placeholder)"""
-  exampleField: Int!
+  quantity: Float = 0
+  completed: Boolean = false
+  listId: ID!
+  itemId: ID!
 }
 
 input UpdateListItemInput {
-  """Example field (placeholder)"""
-  exampleField: Int
-  id: Int!
+  quantity: Float = 0
+  completed: Boolean = false
+  listId: ID
+  itemId: ID
+  id: ID!
 }
